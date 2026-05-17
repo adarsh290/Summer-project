@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from sqlalchemy.orm import Session
 from app.utils.logger import logger
@@ -60,6 +61,8 @@ class ClusteringService:
             
             unique_labels = set(labels)
             
+            face_dict = {f.id: f for f in faces}
+            
             # Simple strategy: Clear existing people and rebuild to avoid complex merge logic
             # (In production with user-renamed people, we'd need stable clustering)
             session.query(Person).delete()
@@ -82,10 +85,31 @@ class ClusteringService:
                     {"person_id": person.id}, synchronize_session=False
                 )
                 
-                # Set the first face as the profile picture
-                person.profile_face_id = person_face_ids[0]
+                # Set the profile picture to the first face that actually has a crop file saved
+                profile_id = person_face_ids[0]
+                for fid in person_face_ids:
+                    if face_dict[fid].face_crop_path:
+                        profile_id = fid
+                        break
+                
+                person.profile_face_id = profile_id
                 
             session.commit()
+            
+            # Cleanup: Delete all face crop files that are not used as a profile picture
+            profile_face_ids = {p.profile_face_id for p in session.query(Person).all() if p.profile_face_id}
+            for face in faces:
+                if face.id not in profile_face_ids and face.face_crop_path:
+                    if os.path.exists(face.face_crop_path):
+                        try:
+                            os.remove(face.face_crop_path)
+                        except Exception as e:
+                            logger.warning(f"Could not remove unused face crop: {e}")
+                    
+                    face.face_crop_path = ""
+            
+            session.commit()
+            
             logger.info(f"Clustering complete. Grouped {len(faces)} faces into {person_count} people.")
             
         except Exception as e:

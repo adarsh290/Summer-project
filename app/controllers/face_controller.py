@@ -1,4 +1,5 @@
 from PySide6.QtCore import QObject, Signal, Slot, QRunnable, QThreadPool, Property
+import os
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from app.utils.logger import logger
@@ -53,7 +54,15 @@ class FaceScanWorker(QRunnable):
                 ).all()
                 image_map = {img.id: img.original_path for img in all_images if img.original_path}
 
-                # Bulk delete old faces in one query
+                # Bulk delete old faces and their crops
+                old_faces = session.query(Face).filter(Face.image_id.in_(list(image_map.keys()))).all()
+                for f in old_faces:
+                    if f.face_crop_path and os.path.exists(f.face_crop_path):
+                        try:
+                            os.remove(f.face_crop_path)
+                        except Exception as e:
+                            logger.warning(f"Could not remove old face crop: {e}")
+                
                 session.query(Face).filter(Face.image_id.in_(list(image_map.keys()))).delete(
                     synchronize_session=False
                 )

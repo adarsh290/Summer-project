@@ -4,6 +4,8 @@ A local-first desktop photo management application built with Python and Qt Quic
 
 Proximi helps you organize, scan, browse, and **safely clean up** large image collections with a responsive, modern interface — all without cloud dependencies.
 
+**Session-Based Architecture**: Proximi is designed as a strict session-based tool. You open it, scan a folder, do your cleanup, and close it. On exit, all databases, caches, logs, and generated files are completely wiped, leaving zero residual disk footprint on your machine.
+
 ---
 
 ## Features
@@ -157,9 +159,11 @@ Summer-project/
 │           ├── ActionBar.qml
 │           ├── ImagePreviewModal.qml   # Fullscreen lightbox
 │           └── ReviewCompleteState.qml # End-of-review screen
-└── data/                               # Local runtime data (gitignored)
+└── data/                               # Ephemeral session data (wiped on exit)
     ├── thumbnails/                     # Cached WEBP thumbnails
     ├── trash/                          # App-managed trash (not OS trash)
+    ├── logs/                           # App logs
+    ├── cache/                          # General cache
     ├── faces/                          # Cropped ML profile pictures
     └── proximi.db                      # SQLite database
 ```
@@ -212,7 +216,8 @@ Repository (database persistence)
 | M4 — Cleanup Workflow | ✅ Complete | Trash system, keeper selection, undo, keyboard shortcuts, lightbox |
 | M5 — Exact Duplicates | ✅ Complete | Hash-based duplicate detection, automatic highest-quality keeper selection |
 | M6 — Facial Segregation | ✅ Complete | Insightface bounding boxes, embeddings, and DBSCAN clustering with People View |
-| M7 — TBD | ⏳ Planned | Candidates: empty trash, export reports, settings persistence |
+| M7 — Session Management | ✅ Complete | Stateless architecture, lock releasing, and auto-wiping of the `data/` directory |
+| M8 — TBD | ⏳ Planned | Candidates: export reports, UI transition animations |
 
 ---
 

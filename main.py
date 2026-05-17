@@ -32,6 +32,7 @@ from app.services.duplicate_service import DuplicateService
 def main():
     # 1. Initialize environment and folders
     folder_service = FolderService()
+    folder_service.cleanup_startup()
     folder_service.ensure_data_directories()
     
     # 2. Initialize Database
@@ -154,6 +155,9 @@ def main():
     if not engine.rootObjects():
         logger.error("Failed to load QML.")
         sys.exit(-1)
+        
+    # Ensure session data is wiped on exit
+    app.aboutToQuit.connect(folder_service.cleanup_data_directory)
         
     logger.info("Proximi started successfully.")
     sys.exit(app.exec())

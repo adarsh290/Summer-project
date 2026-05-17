@@ -32,4 +32,12 @@ def setup_logger() -> logging.Logger:
         
     return logger
 
+def shutdown_logger():
+    """Closes all handlers to release file locks."""
+    global logger
+    handlers = logger.handlers[:]
+    for handler in handlers:
+        handler.close()
+        logger.removeHandler(handler)
+
 logger = setup_logger()

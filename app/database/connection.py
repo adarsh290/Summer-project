@@ -58,4 +58,13 @@ class DatabaseConnection:
         except Exception as e:
             logger.error(f"Failed to clear database: {e}")
 
+    def close_database(self):
+        """Disposes the SQLAlchemy engine, releasing database file locks."""
+        if self.SessionLocal:
+            self.SessionLocal.remove()
+        if self.engine:
+            self.engine.dispose()
+            self.engine = None
+            logger.info("Database connection closed.")
+
 db = DatabaseConnection()

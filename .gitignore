@@ -25,15 +25,8 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 
-# Proximi local runtime data
-data/thumbnails/
-data/trash/
-data/logs/
-data/cache/
-data/faces/
-data/*.db
-data/*.db-shm
-data/*.db-wal
+# Proximi local runtime data (Session-based, cleared on exit)
+data/*
 
 # Keep the data directory itself tracked (for .gitkeep)
 !data/.gitkeep

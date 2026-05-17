@@ -1,8 +1,8 @@
 # Proximi Project Context
 
 ## Current Milestone
-**Milestone 5 — Exact Duplicate Removal**  
-Focus: Enhancing the Proximi photo management engine by adding a dedicated tool for identifying and removing exact duplicates immediately after a folder scan. Identifies identical photos to keep the highest-quality version.
+**Milestone 7 — Session & Disk Space Management**  
+Focus: Refactoring Proximi into a strictly session-based tool. Implementing robust cleanup routines that wipe all ephemeral data (thumbnails, databases, face crops, logs, trash) on application exit and startup, ensuring zero residual disk footprint between sessions. Identifies identical photos to keep the highest-quality version.
 
 ---
 
@@ -73,10 +73,13 @@ app/
         ├── ActionBar.qml           # Cleanup action buttons
         ├── ImagePreviewModal.qml   # Fullscreen lightbox (F key)
         └── ReviewCompleteState.qml # End-of-review summary screen
-data/
-├── thumbnails/
+data/                               # Ephemeral session data (wiped on exit)
+├── thumbnails/                     # Cached thumbnails
 ├── trash/                          # App-managed trash (not OS trash)
-└── proximi.db
+├── logs/                           # App logs
+├── cache/                          # General cache
+├── faces/                          # Cropped ML profile pictures
+└── proximi.db                      # SQLite database
 ```
 
 ---
@@ -366,10 +369,16 @@ data/
 - `ScanController` integration with `removeExactDuplicates()`
 - TopBar UI integration with "Clean Duplicates" button
 
+### Milestone 7 — Session & Disk Space Management *(Current)*
+- Transitioned application to a strict stateless, session-based architecture.
+- Added graceful lock releasing for `proximi.log` and `proximi.db` via `shutdown_logger()` and `db.close_database()`.
+- Implemented `cleanup_startup` and `cleanup_data_directory` in `FolderService` to completely wipe all cached thumbnails, face crops, trash records, and databases on application launch and exit.
+- Integrated disk space cleanup directly into the `ClusteringService` to delete non-profile-picture face crops immediately after person clustering.
+
 ---
 
 ## Known Issues
-- None identified post-Milestone 5.
+- None identified post-Milestone 7.
 
 ## Next Planned Milestone
-- Milestone 6: TBD (Candidates: permanent trash emptying, export reports, smart album suggestions, settings persistence improvements)
+- Milestone 8: TBD (Candidates: export reports, UI transition animations)
